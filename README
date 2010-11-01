@@ -1,0 +1,52 @@
+lein repl
+
+; FYI
+; "->" is a macro that just means "Take the output then 
+;        dump it into the first argument of the next function."
+
+(in-ns 'neo4j-sandbox.core)
+
+(boot-neo4j)
+
+(create-root-type :bad-guys)
+
+(add-typed-node :bad-guy {:name "Agents Smith", :language "C++"})
+
+(def smith (-> (select-where :bad-guys {:name "Agents Smith"}) first))
+
+(update-node smith {:name "Agent Smith", :language "C"} )
+
+; Add some more data.
+(create-root-type :characters)
+(add-typed-node :character {:real-name "Thomas Andersson" :name "Neo" :age 29})
+(add-typed-node :character {:name "Trinity"})
+(add-typed-node :character {:name "Morpheus" :occupation "Total badass" :rank "Captain"})
+(add-typed-node :character {:last-name "Reagan" :name "Cypher"})
+(add-typed-node :character {:name "The architect"})
+
+(def neo       (select-one :character {:name "Neo"}))
+(def morpheus (select-one :character {:name "Morpheus"}))
+(def trinity (select-one :character {:name "Trinity"}))
+(def cypher    (select-one :character {:name "Cypher"}))
+(def architect (select-one :character {:name "The architect"}))
+
+(classify cypher    :bad-guys)
+(classify architect :bad-guys)
+
+(defn knows [n1 n2]
+  (rel n1 :knows n2))
+
+(knows neo morpheus)
+(knows neo trinity)
+(knows trinity cypher)
+(knows morpheus cypher)
+(knows cypher smith)
+(knows smith architect)
+
+(walk :ok-rels [:customers :customer :bad-guys :bad-guy])
+(walk :start-node neo :ok-rels [:knows] :depth 1)
+(walk :start-node neo :ok-rels [:knows] :depth 2)
+(walk :start-node neo :ok-rels [:knows] :depth 3)
+(walk :start-node neo :ok-rels [:knows] :depth 4)
+
+(shutdown-neo4j)
