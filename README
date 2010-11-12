@@ -4,6 +4,8 @@ lein repl
 ; "->" is a macro that just means "Take the output then 
 ;        dump it into the first argument of the next function."
 
+(load "neo4j_sandbox/core")
+
 (in-ns 'neo4j-sandbox.core)
 
 (boot-neo4j)

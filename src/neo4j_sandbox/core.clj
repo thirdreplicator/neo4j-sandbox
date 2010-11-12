@@ -1,16 +1,34 @@
 (ns neo4j-sandbox.core)
-
 ; DIAGRAM OF NEO4J NODE SPACE
+;   A way to map to tables in relational databases.
 ;
-; (top-node)
-;     |
-; (:customers)
-;   |        \
-; (:bob)     (:jane)
+;        (top-node)
+;             |
+;             |
+;             | :customers
+;             |
+
+;            ( )     <--- the root customer node
+
+;          /     \
+;         /       \
+;        /         \
+;       /:customer  \
+;      /             \ :customer
+;     /               \
+;    /                 | 
+;   |                  |
+;   |                  |
+
+; (:bob)            (:jane)   <---- We know these are customer nodes, because 
+;                                     we got here by traversing along the 
+;                                     customer relationship edge.
 ;
 
 (use ['neo4j :exclude ['start 'shutdown]])
 (use 'inflections)
+
+(defn reload [] (use 'neo4j-sandbox.core :reload))
 
 
 ; Utilities
@@ -49,10 +67,11 @@
 ; ***** ***** ***** ***** ***** 
 
 ; CREATE TABLE
-(defn create-root-type [type]
+(defn create-root-type [category]
   (with-tx
-    (let [root-node (new-node {:category type})]
-      (relate (top-node) type root-node))))
+    (let [category-string (name category)
+          root-node   (new-node {:category category-string})]
+      (relate (top-node) category root-node))))
 
 (defn get-root-node [node-type]
   (-> (top-node)
